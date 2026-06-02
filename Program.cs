@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 public class Program
 {
     public static void Main(string[] args)
@@ -23,6 +25,47 @@ public class Program
         personagem.ExibirFicha();
 
         Console.WriteLine("\nPersonagem criado com sucesso! Boa aventura!");
+
+        SalvarPersonagem(personagem);
+    }
+
+    static void SalvarPersonagem(Personagem personagem)
+    {
+        Console.Write("\nDeseja salvar este personagem no banco de dados? (s/n): ");
+        if ((Console.ReadLine() ?? "").Trim().ToLower() != "s") return;
+
+        using var context = new PersonagemContext();
+        context.Database.EnsureCreated();
+
+        var repo  = new PersonagemRepository(context);
+        var model = new PersonagemModel
+        {
+            Nome         = personagem.Nome,
+            Classe       = personagem.Classe.Nome,
+            PontosDeVida = personagem.PontosDeVida,
+            Forca        = personagem.Atributos.Forca,
+            Destreza     = personagem.Atributos.Destreza,
+            Constituicao = personagem.Atributos.Constituicao,
+            Inteligencia = personagem.Atributos.Inteligencia,
+            Sabedoria    = personagem.Atributos.Sabedoria,
+            Carisma      = personagem.Atributos.Carisma,
+            CriadoEm     = DateTime.Now,
+        };
+
+        repo.Salvar(model);
+        Console.WriteLine($"\n  Personagem salvo com sucesso! (ID no banco: #{model.Id})");
+
+        Console.Write("\nExibir todos os personagens salvos? (s/n): ");
+        if ((Console.ReadLine() ?? "").Trim().ToLower() != "s") return;
+
+        var todos = repo.ListarTodos();
+        Console.WriteLine($"\n=== PERSONAGENS SALVOS ({todos.Count}) ===");
+        Console.WriteLine($"  {"ID",-5} {"Nome",-15} {"Classe",-10} {"HP",-5} {"Criado em",-18}");
+        Console.WriteLine(new string('-', 58));
+        foreach (var p in todos)
+        {
+            Console.WriteLine($"  #{p.Id,-4} {p.Nome,-15} {p.Classe,-10} {p.PontosDeVida,-5} {p.CriadoEm:dd/MM/yyyy HH:mm}");
+        }
     }
 
     static ClassePersonagem EscolherClasse()
@@ -65,6 +108,7 @@ public class Program
         for (int i = 0; i < metodos.Count; i++)
         {
             Console.WriteLine($"  [{i + 1}] {metodos[i].Nome}");
+            Console.WriteLine($"       {metodos[i].Descricao}");
         }
 
         Console.Write("\nEscolha (1-3): ");

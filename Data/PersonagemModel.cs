@@ -1,0 +1,14 @@
+public class PersonagemModel
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Classe { get; set; } = "";
+    public int PontosDeVida { get; set; }
+    public int Forca { get; set; }
+    public int Destreza { get; set; }
+    public int Constituicao { get; set; }
+    public int Inteligencia { get; set; }
+    public int Sabedoria { get; set; }
+    public int Carisma { get; set; }
+    public DateTime CriadoEm { get; set; }
+}

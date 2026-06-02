@@ -1,62 +1,53 @@
 public class DistribuicaoPontos : IDistribuicaoAtributos
 {
-    private const int VALOR_BASE    = 8;
-    private const int PONTOS_TOTAIS = 27;
-    private const int VALOR_MAXIMO  = 15;
+    private const int PONTOS_TOTAIS = 72;
+    private const int VALOR_MINIMO  = 3;
+    private const int VALOR_MAXIMO  = 18;
 
-    public string Nome => "Distribuicao por Pontos (Point Buy)";
-    public string Descricao => $"Cada atributo começa em {VALOR_BASE}. Distribua {PONTOS_TOTAIS} pontos (maximo {VALOR_MAXIMO} por atributo).";
+    public string Nome => "Distribuicao por Pontos";
+    public string Descricao => $"Distribua {PONTOS_TOTAIS} pontos entre os 6 atributos (minimo {VALOR_MINIMO}, maximo {VALOR_MAXIMO} cada).";
 
     public Atributos Distribuir()
     {
         string[] nomes = { "Forca", "Destreza", "Constituicao", "Inteligencia", "Sabedoria", "Carisma" };
         int[] valores = new int[6];
-
-        for (int i = 0; i < 6; i++)
-            valores[i] = VALOR_BASE;
-
         int pontosRestantes = PONTOS_TOTAIS;
 
-        Console.WriteLine($"\n  Todos os atributos comecam em {VALOR_BASE}.");
-        Console.WriteLine($"  Voce tem {PONTOS_TOTAIS} pontos para distribuir (maximo {VALOR_MAXIMO} por atributo).\n");
+        Console.WriteLine($"\n  Distribua {PONTOS_TOTAIS} pontos entre os atributos.");
+        Console.WriteLine($"  Cada atributo deve ter entre {VALOR_MINIMO} e {VALOR_MAXIMO}.\n");
 
         for (int i = 0; i < 6; i++)
         {
-            int maxAdicionavel = Math.Min(pontosRestantes, VALOR_MAXIMO - valores[i]);
-            Console.Write($"  {nomes[i],15} (atual: {valores[i]}, restam: {pontosRestantes} pts, pode add ate {maxAdicionavel}): ");
+            int atributosRestantes = 6 - i;
+            int minimoReservado    = (atributosRestantes - 1) * VALOR_MINIMO;
+            int maxPermitido       = Math.Min(VALOR_MAXIMO, pontosRestantes - minimoReservado);
 
-            int adicionar;
+            Console.Write($"  {nomes[i],15} (restam {pontosRestantes} pts, min {VALOR_MINIMO}, max {maxPermitido}): ");
+
+            int valor;
             while (true)
             {
-                if (!int.TryParse(Console.ReadLine(), out adicionar))
+                if (!int.TryParse(Console.ReadLine(), out valor))
                 {
                     Console.Write("    Numero invalido: ");
                     continue;
                 }
-                if (adicionar < 0)
+                if (valor < VALOR_MINIMO)
                 {
-                    Console.Write("    Nao pode ser negativo: ");
+                    Console.Write($"    Minimo e {VALOR_MINIMO}: ");
                     continue;
                 }
-                if (adicionar > pontosRestantes)
+                if (valor > maxPermitido)
                 {
-                    Console.Write($"    So restam {pontosRestantes} pontos: ");
-                    continue;
-                }
-                if (valores[i] + adicionar > VALOR_MAXIMO)
-                {
-                    Console.Write($"    Maximo permitido e {VALOR_MAXIMO}: ");
+                    Console.Write($"    Maximo permitido e {maxPermitido}: ");
                     continue;
                 }
                 break;
             }
 
-            valores[i] += adicionar;
-            pontosRestantes -= adicionar;
+            valores[i]      = valor;
+            pontosRestantes -= valor;
         }
-
-        if (pontosRestantes > 0)
-            Console.WriteLine($"\n  Atencao: {pontosRestantes} ponto(s) nao foram utilizados.");
 
         return new Atributos
         {

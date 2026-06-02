@@ -1,0 +1,168 @@
+========================================================
+  ROTEIRO DE VIDEO - TRABALHO RPG OLD DRAGON (C# / OOP)
+  Persistencia com Entity Framework + Testes Unitarios
+========================================================
+
+DURACAO ESTIMADA: 8 a 12 minutos
+FORMATO: Gravacao de tela (sem rosto necessario)
+FERRAMENTA SUGERIDA: OBS Studio ou gravador do Windows (Win+G)
+
+--------------------------------------------------------
+PARTE 1 - INTRODUCAO E VISAO GERAL DO PROJETO (1-2 min)
+--------------------------------------------------------
+
+[Abrir o VS Code ou Visual Studio com a solucao aberta]
+
+- Falar: "Neste video vamos demonstrar o trabalho pratico de
+  Orientacao a Objetos em C#, baseado no sistema de RPG Old Dragon."
+
+- Mostrar a estrutura de arquivos no explorador lateral:
+  > Arquivos de dominio: Personagem.cs, Atributos.cs,
+    ClassePersonagem.cs, as 4 classes (Guerreiro, Clerigo, Mago, Ladino),
+    as 3 formas de distribuicao (RolagemSequencial, RolagemLivre,
+    DistribuicaoPontos) e a interface IDistribuicaoAtributos
+  > Pasta Data/: PersonagemModel.cs, PersonagemContext.cs,
+    PersonagemRepository.cs
+  > Pasta TrabalhoRPG.Tests/: PersonagemContextTests.cs,
+    PersonagemRepositoryTests.cs
+
+- Falar: "O projeto segue dois padroes de projeto: Strategy, para
+  as tres formas de distribuicao de atributos, e Template Method,
+  na classe abstrata ClassePersonagem."
+
+--------------------------------------------------------
+PARTE 2 - EXPLICANDO A PERSISTENCIA COM EF CORE (3-4 min)
+--------------------------------------------------------
+
+[Abrir Data/PersonagemModel.cs]
+
+- Falar: "Comecamos pelo modelo de dados. A classe PersonagemModel
+  representa a entidade que sera salva no banco. Ela tem o campo Id,
+  que o Entity Framework usa como chave primaria com auto-incremento,
+  alem de Nome, Classe, PontosDeVida, os seis atributos e a data
+  de criacao."
+
+[Abrir Data/PersonagemContext.cs]
+
+- Falar: "O PersonagemContext herda de DbContext, que e a classe
+  principal do Entity Framework. Ele tem um DbSet chamado Personagens,
+  que representa a tabela no banco de dados."
+
+- Apontar para o construtor com DbContextOptions:
+  "Criamos dois construtores: o padrao, que usa SQLite com o arquivo
+  rpg.db, e um segundo que aceita opcoes externas — esse e usado
+  nos testes unitarios, onde passamos um banco em memoria."
+
+- Apontar para o OnConfiguring:
+  "O metodo OnConfiguring so configura o SQLite se nenhuma opcao
+  foi passada antes. Isso garante que os testes possam injetar
+  suas proprias configuracoes."
+
+[Abrir Data/PersonagemRepository.cs]
+
+- Falar: "O PersonagemRepository implementa o padrao Repository.
+  Ele recebe o contexto por injecao de dependencia e expoe quatro
+  operacoes: Salvar, ListarTodos, BuscarPorId e Deletar."
+
+- Mostrar o metodo Salvar:
+  "Adicionamos o modelo ao DbSet e chamamos SaveChanges. Apos isso,
+  o Entity Framework preenche automaticamente o Id gerado pelo banco."
+
+[Abrir Program.cs - metodo SalvarPersonagem]
+
+- Falar: "No Program, apos criar o personagem, perguntamos se o
+  usuario quer salvar. Se sim, criamos o contexto, chamamos
+  EnsureCreated para garantir que o banco e as tabelas existam
+  caso seja a primeira vez, e usamos o repositorio para salvar."
+
+- Mostrar a exibicao da lista de personagens salvos:
+  "Tambem mostramos todos os personagens ja salvos, com ID,
+  nome, classe, pontos de vida e data."
+
+--------------------------------------------------------
+PARTE 3 - DEMONSTRACAO AO VIVO (2-3 min)
+--------------------------------------------------------
+
+[Abrir terminal no VS Code - pasta do projeto]
+
+- Rodar o programa:
+  dotnet run
+
+- Fazer a demonstracao completa:
+  1. Digitar um nome de personagem (ex: "Thorin")
+  2. Escolher classe: Guerreiro (opcao 1)
+  3. Escolher metodo: Distribuicao por Pontos (opcao 3)
+  4. Distribuir os 72 pontos (ex: FOR 18, DES 12, CON 15,
+     INT 9, SAB 9, CAR 9)
+  5. Ver a ficha exibida com HP calculado
+  6. Digitar "s" para salvar
+  7. Ver a confirmacao com o ID gerado (#1)
+  8. Digitar "s" para ver todos os salvos
+
+- [Opcional] Rodar uma segunda vez com outro personagem
+  para mostrar que a lista acumula e os IDs incrementam.
+
+- Mostrar o arquivo rpg.db gerado na pasta do projeto.
+
+--------------------------------------------------------
+PARTE 4 - TESTES UNITARIOS (2-3 min)
+--------------------------------------------------------
+
+[Abrir TrabalhoRPG.Tests/PersonagemContextTests.cs]
+
+- Falar: "Os testes unitarios cobrem as classes de persistencia.
+  Eles foram estruturados com o framework xUnit, muito usado
+  em projetos .NET profissionais."
+
+- Explicar o helper CriarContexto:
+  "Cada teste cria um contexto completamente isolado usando
+  UseInMemoryDatabase com um GUID unico. Isso garante que um
+  teste nao interfere no outro."
+
+- Mostrar dois testes de exemplo:
+  > AdicionarPersonagem_AtribuiIdAutomatico: verifica que o EF
+    preenche o Id apos o SaveChanges
+  > BuscarPorId_RetornaPersonagemCorreto: verifica que os dados
+    persistidos podem ser recuperados corretamente
+
+[Abrir TrabalhoRPG.Tests/PersonagemRepositoryTests.cs]
+
+- Falar: "No arquivo de testes do repositorio testamos todas as
+  operacoes da camada de acesso a dados."
+
+- Mostrar exemplos:
+  > Salvar_AtribuiIdAoModelo
+  > ListarTodos_RetornaTodosPersonagensSalvos
+  > BuscarPorId_IdInexistenteRetornaNull
+  > Deletar_RemovePersonagemDoBanco
+  > Deletar_IdInexistente_NaoLancaExcecao (teste de robustez)
+  > Salvar_AtributosPersonagemSaoPreservados (verifica integridade)
+
+[Abrir terminal]
+
+- Rodar os testes:
+  dotnet test TrabalhoRPG.Tests\TrabalhoRPG.Tests.csproj --verbosity normal
+
+- Apontar para o resultado:
+  "Todos os 14 testes passaram. Temos 6 testes no
+  PersonagemContextTests e 8 no PersonagemRepositoryTests,
+  cobrindo os cenarios principais e casos de borda."
+
+--------------------------------------------------------
+PARTE 5 - ENCERRAMENTO (30 seg)
+--------------------------------------------------------
+
+- Falar: "Neste trabalho implementamos em C# a criacao de
+  personagens do Old Dragon com as tres formas de distribuicao
+  de atributos, as quatro classes e o calculo de pontos de vida.
+  Adicionamos persistencia com Entity Framework Core e SQLite,
+  usando o padrao Repository, e validamos a camada de dados
+  com 14 testes unitarios."
+
+- Mostrar o repositorio no GitHub uma ultima vez.
+
+- Encerrar.
+
+========================================================
+FIM DO ROTEIRO
+========================================================

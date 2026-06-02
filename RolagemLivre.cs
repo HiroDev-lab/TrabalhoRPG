@@ -2,34 +2,27 @@ public class RolagemLivre : IDistribuicaoAtributos
 {
     private readonly Random _rng = new Random();
 
-    public string Nome => "Rolagem Livre (4d6 descarta menor, distribui à vontade)";
-    public string Descricao => "Rola 4d6 sete vezes, descarta o menor dado de cada rolagem e o pior total. Você escolhe onde colocar cada valor.";
+    public string Nome => "Rolagem Livre (3d6, distribui a vontade)";
+    public string Descricao => "Rola 3d6 seis vezes. Voce escolhe em qual atributo colocar cada resultado.";
 
     public Atributos Distribuir()
     {
         List<int> rolagens = new List<int>();
-
-        for (int i = 0; i < 7; i++)
-        {
-            rolagens.Add(Rolar4d6DescartaMenor());
-        }
+        for (int i = 0; i < 6; i++)
+            rolagens.Add(Rolar3d6());
 
         rolagens.Sort((a, b) => b.CompareTo(a));
-        rolagens.RemoveAt(rolagens.Count - 1);
 
-        Console.WriteLine("\nValores disponiveis para distribuir (do maior ao menor):");
+        Console.WriteLine("\n  Valores disponiveis (do maior ao menor):");
         for (int i = 0; i < rolagens.Count; i++)
-        {
-            Console.WriteLine($"  [{i + 1}] {rolagens[i]}");
-        }
+            Console.WriteLine($"    [{i + 1}] {rolagens[i]}");
 
         return AtribuirInterativamente(rolagens);
     }
 
-    private int Rolar4d6DescartaMenor()
+    private int Rolar3d6()
     {
-        int[] dados = { _rng.Next(1, 7), _rng.Next(1, 7), _rng.Next(1, 7), _rng.Next(1, 7) };
-        return dados.Sum() - dados.Min();
+        return _rng.Next(1, 7) + _rng.Next(1, 7) + _rng.Next(1, 7);
     }
 
     private Atributos AtribuirInterativamente(List<int> valores)
@@ -40,11 +33,11 @@ public class RolagemLivre : IDistribuicaoAtributos
 
         for (int i = 0; i < 6; i++)
         {
-            Console.Write($"\nValor para {nomes[i]} (disponiveis: {string.Join(", ", disponiveis)}): ");
+            Console.Write($"\n  Valor para {nomes[i]} (disponiveis: {string.Join(", ", disponiveis)}): ");
             int escolha;
             while (!int.TryParse(Console.ReadLine(), out escolha) || !disponiveis.Contains(escolha))
             {
-                Console.Write("  Valor invalido. Escolha um da lista: ");
+                Console.Write("    Valor invalido. Escolha um da lista: ");
             }
             resultado[i] = escolha;
             disponiveis.Remove(escolha);
